@@ -1,5 +1,11 @@
+body{
+  background: #222326;
+  color: white;
+}
+
 .App {
   text-align: center;
+  background: #222326;
 }
 
 .App-link {
@@ -8,4 +14,9 @@
 
 .dt{
   margin: 0.2%;
+}
+
+.title{
+  margin-top: 1%;
+  text-align: center;
 }

@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
-import './App.css';
 import Spotify from 'spotify-web-api-js';
-import {Button, Dropdown, ButtonToolbar} from 'react-bootstrap';
+import {Button, Dropdown, ButtonToolbar, Container, Row, Col} from 'react-bootstrap';
+import './App.css';
+import DataContainer from './components/DataContainer/DataContainer';
+import LandingPage from './components/LandingPage/LandingPage';
+import PlaylistsModal from './components/PlaylistsModal/PlaylistsModal';
 
 const spotifyWebApi = new Spotify();
 
@@ -12,25 +15,50 @@ class App extends Component{
     const params = this.getHashParams();
     this.state = {
       loggedIn: params.access_token? true: false,
-      nowPlaying: {
-        name: "Not Checked!",
-        image: ''
-      },
       searchResults: {},
       redditCategory: "Category",
       redditTime: "Time",
       redditResults: [],
-      toggleTime: true
+      toggleTime: true,
+      redditIsLoaded: false,
+      userPlaylists: [],
+      displayPlaylists: false,
+      accessToken : params.access_token
     }
 
     if(params.access_token) {
       spotifyWebApi.setAccessToken(params.access_token);
+
+      spotifyWebApi.getMe()
+        .then( user => {
+          // 
+          this.setState({userId : user.id});
+        });
+
+      spotifyWebApi.getUserPlaylists({limit: 50})
+        .then( 
+          data => {
+
+            var usersOwnPlaylists = [];
+
+            data.items.forEach(playlist => {
+              
+              if(playlist.owner.id === this.state.userId){
+                usersOwnPlaylists.push(playlist);
+              }
+            });
+
+            this.setState({
+              userPlaylists: usersOwnPlaylists
+            });
+          },
+          error => {
+            console.error(error);
+          }
+        );
+
     }
 
-  }
-
-  componentDidMount() {
-    console.log(this.state);
   }
 
   getHashParams() {
@@ -43,21 +71,6 @@ class App extends Component{
     return hashParams;
   }
 
-  searchForSong(){
-      spotifyWebApi.searchTracks('Love')
-        .then( data => {
-          console.log("Searched");
-          this.setState({
-            searchResults: data.tracks.items
-          });
-
-          console.log(this.state);
-
-        }, (err) => {
-          console.log(err);
-        });
-  }
-
   setRedditTime(timeSpan){
     this.setState({
       redditTime: timeSpan
@@ -65,7 +78,6 @@ class App extends Component{
   }
 
   setRedditCategory(category){
-
     var showTime;
     if(category.toLowerCase() === "hot" || category.toLowerCase() === "rising" || category.toLowerCase() === "new") {
       showTime = false;
@@ -77,13 +89,16 @@ class App extends Component{
     this.setState({
       redditCategory: category,
       toggleTime: showTime
-    });
-
-    console.log(this.state);
-    
+    });    
   }
 
+
   queryReddit() {
+
+    // these state changes reset the list of reddit posts so that they can be re-rendered when the options are changed
+    this.setState({redditIsLoaded: false});
+    this.setState({redditItems : []});
+
     var time = "";  
     var category = this.state.redditCategory.toLowerCase();
 
@@ -91,7 +106,6 @@ class App extends Component{
       alert("Please enter a category");
       return;
     }
-
 
     switch(this.state.redditTime){
       case "Now":{
@@ -139,59 +153,43 @@ class App extends Component{
       .then( (json) => {
         var ar = [];
         var posts = json.data.children;
-        console.log("Logging result");
-        console.log(json.data.children);
+        
         for(let i = 0; i < posts.length; i++){
           var currentPost = posts[i];
-          if(currentPost.kind != "t3") {
+          if(currentPost.kind !== "t3") {
               continue;
           }
+
           currentPost = currentPost.data;
-          ar.push(currentPost);
-          
+          var postIsValid = this.isValidPost(currentPost);
+          // 
+          if(postIsValid){ 
+              ar.push(currentPost);
+          }
         }
         
         this.setState({
-          redditResults: ar
-        });
-        console.log("Querying reddit url: " + redditQueryUrl);
-        console.log(this.state);
+          redditResults: ar,
+          redditIsLoaded: true
+        });      
       });
   }
 
   isValidPost(post){
-    var title = post.title.toLowerCase();
-    var validTitle = !title.includes("discussion") && !title.includes("playlist");
-
     if(!post.url.toLowerCase().includes("youtube.com")) {
         return false;
     }
-
-    var validFlair = this.isValidFlair(post.link_flair_text);
-    var validArchive = post.archived == true;
-
-    return validFlair && validTitle && validArchive;
-}
-
-  isValidFlair(flair){
-      if (flair == null) {
-          return false;
-      } else {
-          var flairText = flair.toLowerCase();
-          return !flairText.includes("discussion") && 
-          !flairText.includes("playlist");
-      }
+    return true;
   }
 
-  getRedditResults(category, time){
-    var redditQuery = "https://www.reddit.com/r/listentothis/top.json?"
-  }
+  redirectToLogin() {
+    window.location.href="http://localhost:8888/spotify-login";
+  } 
 
   render() {
-
     var timeDropDown = 
       <Dropdown className="dt">
-      <Dropdown.Toggle variant="primary" className="reddit-dropdown">
+      <Dropdown.Toggle variant="outline-success" className="reddit-dropdown">
         {this.state.redditTime}
       </Dropdown.Toggle>
       <Dropdown.Menu>
@@ -204,13 +202,18 @@ class App extends Component{
       </Dropdown.Menu>
     </Dropdown>;
 
-    return (
-      <div className="App">
-        <h1>Reddit To Playlist</h1>
-        <div>
+    var mainContent = 
+    <div>
+      <Row>
+        <Col>
+          <h2 className="title">MAKE ME A PLAYLIST</h2>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
         <ButtonToolbar>
           <Dropdown className="dt">
-              <Dropdown.Toggle variant="primary" className="reddit-dropdown">
+              <Dropdown.Toggle variant="outline-success" className="reddit-dropdown">
                 {this.state.redditCategory}
               </Dropdown.Toggle>
               <Dropdown.Menu>
@@ -222,9 +225,19 @@ class App extends Component{
               </Dropdown.Menu>
             </Dropdown>
             {this.state.toggleTime? timeDropDown: null}
-            <Button onClick= {() => this.queryReddit()}>Go</Button>
+            <Button variant="success" onClick = {() => this.queryReddit()}>Go</Button>
         </ButtonToolbar>
-        </div>
+        {this.state.redditIsLoaded? <DataContainer redditItems={this.state.redditResults} spotifyWebApi = {spotifyWebApi} accessToken={this.state.accessToken} playlists={this.state.userPlaylists}/> : null}
+        </Col>
+      </Row>
+        </div>; 
+
+    return (
+      <div className="App">
+        <Container>
+          {this.state.loggedIn ? mainContent : <LandingPage />}
+        </Container>
+        
       </div>
     );
   }

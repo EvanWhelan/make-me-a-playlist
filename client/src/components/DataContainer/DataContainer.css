@@ -1,0 +1,43 @@
+.trackContainer {
+    position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.songTitle {
+    text-align: center;
+    margin-top: 5%;
+}
+
+.dataContainer {
+    background: #222326;
+}
+
+.iframe {
+    border: 0;
+    margin-left: 0;
+}
+
+.dataRow {
+    margin-top: 1%;
+    margin-bottom: 2%;
+}
+
+.redditIcon {
+    margin : 1%;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover{
+    color: #FF5700;
+    background-color: white;
+    cursor: pointer;
+}
+
+.redditIcon:hover {
+    cursor: pointer;
+}

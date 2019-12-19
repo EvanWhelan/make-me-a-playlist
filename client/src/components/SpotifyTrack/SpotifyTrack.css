@@ -1,0 +1,20 @@
+.addButton { 
+    float: left;
+    position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    float: right;
+    margin-right: 10%;
+    width: 30%;
+    height: 50%;
+    background-color: #1ED760;
+    color: white;
+    border: 0;
+    border-radius: 10%;
+}
+
+.addButton:hover {
+    font-weight: bold;
+    border: 1px solid grey;
+}

@@ -1,0 +1,76 @@
+.playlistDetails {
+    background: #222326;
+
+    margin: 1%;
+    height: 10em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+
+}
+.playlistImage{
+    width: 35%;
+    height: 65%;
+    text-align: left;
+    margin-left: 10%;
+    border-radius: 30%;
+}   
+
+.playlistName {
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: bold;
+    font-family: 'Calibri';
+    color: white;
+}
+
+.addButtonModal {
+    float: right;
+    margin-right: 10%;
+    width: 30%;
+    height: 60%;
+    background-color: #1ED760;
+    color: white;
+    border: 0;
+    border-radius: 10%;
+}
+
+.addButtonModal {
+    font-weight: bold;
+}
+
+.playlistHeader {
+    text-align: center;
+}
+
+.playlistsTitle {
+    color: black;
+}
+
+a:link {
+    text-decoration: none;
+  }
+  
+  a:visited {
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  a:active {
+    text-decoration: underline;
+  }
+
+a {
+    text-decoration: none;
+    text-transform: capitalize;
+    color: white;
+}
+
+.playlistLink:hover {
+    font-weight: bolder;
+    background: none;
+    text-decoration: none;
+}
